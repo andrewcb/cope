@@ -1,0 +1,17 @@
+[project]
+name = "cope"
+version = "0.1.0"
+authors = [
+  { name="Andrew Bulhak" }
+]
+requires-python = ">=3.5"
+dependencies = [
+]
+classifiers = [
+  "Operating System :: POSIX",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License"
+]
+
+[project.urls]
+"Homepage" = "https://github,com/andrewcb/cope/"

@@ -71,6 +71,15 @@ All paths here are relative to the input or output directories, as relevant.
 
 To keep track of which files had been processed, `cope` creates a hidden directory named `.copemetadata` under the destination path; a SQLite database is stored under this directory; there, each processing of an input file to an output file is recorded, along with the modification times of the files involved. If the input file is modified subsequently, the new time will invalidate this, causing it to be reprocessed when the script is next run.
 
+## Testing
+
+`cope` comes with unit tests, in the `tests` directory. The files may be run individually with `python3 -m unittest`, or to run all of them (assuming you have zsh), `python3 -m unittest tests/**/*.py`
+
+## Compatibility and performance
+
+`cope` was developed and tested on Linux using Python 3; it should, in theory, run on other POSIX-like environments and possibly Windows as well, though has not been tested. `cope` currently does not use any dependencies not in a standard Python distribution.
+
+Other than keeping track of individual files already handled, `cope` is not yet optimised, and there are probably ways to make it considerably faster in traversing large collections of input.
 
 ## Author
 Andrew Bulhak (https://github.com/andrewcb/)
