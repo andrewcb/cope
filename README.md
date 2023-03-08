@@ -67,6 +67,45 @@ The `run` method returns a `FileProcessor.Result` object, which contains the fol
 
 All paths here are relative to the input or output directories, as relevant.
 
+## Standard processing functions
+
+`cope` provides a suite of processing functions, and functions for building processing functions, as standard, under `cope.Process`. These are:
+
+- `Process.run(args)` - Returns a process function to run an external process, which is presumed to create the output file from the input file. The arguments are strings as would be passed to `popen` or `subprocess.run`; the special values `cope.INFILE` and `cope.OUTFILE` are replaced with input and output file paths. For example, to invoke the UNIX `cp` command, a call could look like 
+```python
+cope.FileProcessor(
+	"/input_files", 
+	"/output_files", 
+	my_renaming_function,
+	Process.run("/bin/cp", cope.INFILE, cope.OUTFILE)
+)
+```
+(In practice, one would use `Process.copy` in this instance.)
+
+If the called process returns a nonzero exit code, a `subprocess.CalledProcessError` is raised
+
+- `Process.captureOutputOf(args)` - like `Process.run`, only to invoke a process whose output will constitute the output file. For this reason, the `OUTFILE` token is not used in the arguments. For example, to use the `cjpeg` JPEG encoder (which sends its output to stdout):
+```python
+cope.FileProcessor(
+	"/input_files", 
+	"/output_files", 
+	my_renaming_function,
+	Process.captureOutputOf("cjpeg", "-quality", "100", cope.INFILE)
+)
+```
+
+- `process.copy` - a function to copy the source file to the destination path. The example for `Process.run` could be rewritten more efficiently as:
+```python
+cope.FileProcessor(
+	"/input_files", 
+	"/output_files", 
+	my_renaming_function,
+	Process.copy
+)
+```
+
+- `process.hardLink` - a function to create a POSIX hard link from the source file to the destination path. Not available on all file systems.
+
 ## Tracking already processed files
 
 To keep track of which files had been processed, `cope` creates a hidden directory named `.copemetadata` under the destination path; a SQLite database is stored under this directory; there, each processing of an input file to an output file is recorded, along with the modification times of the files involved. If the input file is modified subsequently, the new time will invalidate this, causing it to be reprocessed when the script is next run.

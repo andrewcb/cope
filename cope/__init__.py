@@ -30,6 +30,7 @@ Typical usage:
 """
 
 from .fileprocessor import FileProcessor
+from .processfunctions import Process, INFILE, OUTFILE
 
-__all__ = ['FileProcessor']
+__all__ = ['FileProcessor', 'Process', 'INFILE', 'OUTFILE']
 
