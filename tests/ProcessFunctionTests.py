@@ -55,7 +55,6 @@ class ProcessFunctionTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree,
 			self.outtree,
-			lambda name:name,
 			Process.run("/usr/bin/sort", "-o", OUTFILE, INFILE)
 		)
 
@@ -78,7 +77,6 @@ class ProcessFunctionTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree,
 			self.outtree,
-			lambda name:name,
 			Process.run("/bin/false")
 		)
 
@@ -101,7 +99,6 @@ class ProcessFunctionTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree,
 			self.outtree,
-			lambda name:name,
 			Process.captureOutputOf("/usr/bin/sort", INFILE)
 		)
 
@@ -126,7 +123,6 @@ class ProcessFunctionTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree,
 			self.outtree,
-			lambda name:name,
 			Process.copy
 		)
 		log = proc.run()
@@ -149,7 +145,6 @@ class ProcessFunctionTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree,
 			self.outtree,
-			lambda name:name,
 			Process.hardLink
 		)
 		log = proc.run()

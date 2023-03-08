@@ -26,8 +26,8 @@ def process_file(source, dest):
 proc = cope.FileProcessor(
 	"/raw_files", 
 	"/processed_files", 
-	destination_name_for, 
-	process_file
+	process_file,
+	destination_name_for
 )
 
 report = proc.run()
@@ -46,8 +46,8 @@ The `FileProcessor` is configured at creation time, with all options including s
 
 - `srcpath` (required): the root of the directory tree from which input files will be taken
 - `destpath` (required): the root of the directory tree in which output files will be placed
-- `destname` (required): A function which is given the name of a input file and comes up with a name for the output file to be created from it. This takes either one or two arguments: the first argument is the relative path of the input file under `srcpath`, and if a second argument is accepted, it will be prefilled with the absolute path of the file in the filesystem, ready to access for inspection. The function must return a relative path to be placed under the destination tree or `None` if the file should be rejected for processing.
 - `process` (required): the function which creates an output file from an input file. It takes two arguments: the absolute path of the input file and the absolute path the output file is to be written at. This function may create the file in Python, copy/link the source to the destination (useful if the script's purpose is naming/arranging files rather than converting them), or call a shell command to perform the operation.
+- `destname` (optional): A function which is given the name of a input file and comes up with a name for the output file to be created from it. This takes either one or two arguments: the first argument is the relative path of the input file under `srcpath`, and if a second argument is accepted, it will be prefilled with the absolute path of the file in the filesystem, ready to access for inspection. The function must return a relative path to be placed under the destination tree or `None` if the file should be rejected for processing. If omitted, the relative destination path will be the same as the relative source path.
 - `iterator` (optional): if specified, this allows an alternative operation for enumerating possible input files in the source directory to be specified. If not, the default is used, which is to walk the directory tree using `os.walk`. Cases where an iterator may be useful include where the source directory tree contains an index or database of some sort listing all viable files, which should be used as a source of truth instead of walking the filesystem. The iterator function should accept the path of a source directory and return a generator that yields the relative paths of all potentially relevant files within it.
 - `includename` (optional): if specified, this is a function that determines from an input file's relative path whether this file should be processed. This looks only at the name, and not the contents, and should be used for things such as filtering out files without the correct extensions; i.e., `lambda name: name.endswith('.jpg')`.
 - `onprogress` (optional): a function that, if provided, will be called for each input file processing attempt with three arguments: a `FileProcessor.ProgressType` value, a source path, and either a destination path (if successful), an error (if an error occurred) or `None` if no name could be derived.
@@ -76,7 +76,6 @@ All paths here are relative to the input or output directories, as relevant.
 cope.FileProcessor(
 	"/input_files", 
 	"/output_files", 
-	my_renaming_function,
 	Process.run("/bin/cp", cope.INFILE, cope.OUTFILE)
 )
 ```
@@ -89,7 +88,6 @@ If the called process returns a nonzero exit code, a `subprocess.CalledProcessEr
 cope.FileProcessor(
 	"/input_files", 
 	"/output_files", 
-	my_renaming_function,
 	Process.captureOutputOf("cjpeg", "-quality", "100", cope.INFILE)
 )
 ```
@@ -99,7 +97,6 @@ cope.FileProcessor(
 cope.FileProcessor(
 	"/input_files", 
 	"/output_files", 
-	my_renaming_function,
 	Process.copy
 )
 ```

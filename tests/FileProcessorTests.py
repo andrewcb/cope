@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import time
 
-from cope import FileProcessor
+from cope import FileProcessor, Process
 
 class FileProcessorTests(unittest.TestCase):
 
@@ -56,8 +56,8 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
+			Process.hardLink,
 			destname,
-			os.link,
 			includename=lambda fn: fn.endswith(".aa"))
 
 		log = proc.run()
@@ -88,7 +88,7 @@ class FileProcessorTests(unittest.TestCase):
 				with open(dst, 'w') as fo:
 					fo.write(fi.read())
 		proc = FileProcessor(
-			self.intree, self.outtree, destname, process, 
+			self.intree, self.outtree, process, destname,
 			includename=lambda fn: fn.endswith(".aa"))
 
 		# run 1
@@ -132,8 +132,8 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
+			Process.hardLink,
 			destname,
-			os.link,
 			includename=lambda fn: fn.endswith(".aa"))
 
 		log = proc.run(dry_run=True)
@@ -158,9 +158,10 @@ class FileProcessorTests(unittest.TestCase):
 
 		proc = FileProcessor(
 			self.intree, 
-			self.outtree, 
-			destname,
-			os.link)
+			self.outtree,
+			Process.hardLink,
+			destname
+		)
 		log = proc.run(dry_run=False)
 		self.assertEqual(set(log.processed), {("01/20.aa", "0120.aa"), ("02/11.aa", "0211.aa")})
 		self.assertEqual(log.already_present, [])
@@ -186,8 +187,9 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
-			destname,
-			process)
+			process,
+			destname
+		)
 		log = proc.run(dry_run=False)
 		self.assertEqual(set(log.processed), {("01/20.aa", "0120.aa"), ("02/11.aa", "0211.aa")})
 		self.assertEqual(log.already_present, [])
@@ -217,8 +219,8 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
+			Process.copy,
 			destname,
-			shutil.copy,
 			onprogress=onprogress
 		)
 		proc.run(dry_run=False)
@@ -259,8 +261,8 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
-			destname,
-			os.link,
+			Process.hardLink,
+			destname
 		)
 
 		log1 = proc.run(max_items=2)
@@ -304,8 +306,8 @@ class FileProcessorTests(unittest.TestCase):
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
+			Process.hardLink,
 			destname,
-			os.link,
 			iterator=iterator)
 
 		log = proc.run()

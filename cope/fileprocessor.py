@@ -23,13 +23,13 @@ class FileProcessor:
 		UNNAMEABLE = 3
 		ERROR = 4
 
-	def __init__(self, srcpath, destpath, destname, process, iterator=None, includename=None, onprogress=None):
+	def __init__(self, srcpath, destpath, process, destname=None, iterator=None, includename=None, onprogress=None):
 		"""
 		Create a FileProcessor object. The arguments are:
 		- srcpath: the tree containing files to traverse and process
 		- destpath: the tree to place output (and working metadata) in
-		- destname: a function that takes two arguments (the path relative to the source tree of a file and (optionally) its absolute path in the filesystem) and returns its relative path for its product, or None if the file is to be omitted
 		- process: a function, given the absolute path of an input file and that of its output, carries out the process of generating the output from the input.
+		- destname: a function that takes two arguments (the path relative to the source tree of a file and (optionally) its absolute path in the filesystem) and returns its relative path for its product, or None if the file is to be omitted
 		- iterator: a function which takes a path and returns a generator of relative paths of input files within the source directory
 		- includename: an optional function determining whether a file should be included; this should work solely by inspecting its name
 		- onprogress: an optional function which, if provided, is called after each file is handled (one way or another), with a ProgressType, a source relative path and (where valid) a destination relative path. This is intended to be used for progress indicators or similar.
@@ -37,7 +37,7 @@ class FileProcessor:
 		self.srcpath = srcpath
 		self.destpath = destpath
 		self.includename = includename and includename or (lambda n: True)
-		self.destname = destname
+		self.destname = destname and destname or (lambda name: name)
 		self.process = process
 		self.iterator = iterator and iterator or TreeWalkIterator
 		# a method to call once any file has been processed/skipped, called with a ProgressType enum, source path and destination path or None
