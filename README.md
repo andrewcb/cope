@@ -46,7 +46,7 @@ The `FileProcessor` is configured at creation time, with all options including s
 
 - `srcpath` (required): the root of the directory tree from which input files will be taken
 - `destpath` (required): the root of the directory tree in which output files will be placed
-- `process` (required): the function which creates an output file from an input file. It takes two arguments: the absolute path of the input file and the absolute path the output file is to be written at. This function may create the file in Python, copy/link the source to the destination (useful if the script's purpose is naming/arranging files rather than converting them), or call a shell command to perform the operation.
+- `process` (required): the function which creates an output file from an input file. It takes two arguments: the absolute path of the input file and the absolute path the output file is to be written at. This function may create the file in Python, copy/link the source to the destination (useful if the script's purpose is naming/arranging files rather than converting them), or call a shell command to perform the operation. You can supply a function of your own, or use one of the provided functions under `cope.Process` as described further below.
 - `destname` (optional): A function which is given the name of a input file and comes up with a name for the output file to be created from it. This takes either one or two arguments: the first argument is the relative path of the input file under `srcpath`, and if a second argument is accepted, it will be prefilled with the absolute path of the file in the filesystem, ready to access for inspection. The function must return a relative path to be placed under the destination tree or `None` if the file should be rejected for processing. If omitted, the relative destination path will be the same as the relative source path.
 - `iterator` (optional): if specified, this allows an alternative operation for enumerating possible input files in the source directory to be specified. If not, the default is used, which is to walk the directory tree using `os.walk`. Cases where an iterator may be useful include where the source directory tree contains an index or database of some sort listing all viable files, which should be used as a source of truth instead of walking the filesystem. The iterator function should accept the path of a source directory and return a generator that yields the relative paths of all potentially relevant files within it.
 - `includename` (optional): if specified, this is a function that determines from an input file's relative path whether this file should be processed. This looks only at the name, and not the contents, and should be used for things such as filtering out files without the correct extensions; i.e., `lambda name: name.endswith('.jpg')`.
@@ -79,9 +79,9 @@ cope.FileProcessor(
 	Process.run("/bin/cp", cope.INFILE, cope.OUTFILE)
 )
 ```
-(In practice, one would use `Process.copy` in this instance.)
+  (In practice, one would use `Process.copy` in this instance.)
 
-If the called process returns a nonzero exit code, a `subprocess.CalledProcessError` is raised
+  If the called process returns a nonzero exit code, a `subprocess.CalledProcessError` is raised
 
 - `Process.captureOutputOf(args)` - like `Process.run`, only to invoke a process whose output will constitute the output file. For this reason, the `OUTFILE` token is not used in the arguments. For example, to use the `cjpeg` JPEG encoder (which sends its output to stdout):
 ```python
@@ -103,7 +103,9 @@ cope.FileProcessor(
 
 - `process.hardLink` - a function to create a POSIX hard link from the source file to the destination path. Not available on all file systems.
 
-## Tracking already processed files
+## Implementation details
+
+### Tracking already processed files
 
 To keep track of which files had been processed, `cope` creates a hidden directory named `.copemetadata` under the destination path; a SQLite database is stored under this directory; there, each processing of an input file to an output file is recorded, along with the modification times of the files involved. If the input file is modified subsequently, the new time will invalidate this, causing it to be reprocessed when the script is next run.
 
