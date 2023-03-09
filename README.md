@@ -67,32 +67,15 @@ The `run` method returns a `FileProcessor.Result` object, which contains the fol
 
 All paths here are relative to the input or output directories, as relevant.
 
-## Standard processing functions
+## Helper functions
 
-`cope` provides a suite of processing functions, and functions for building processing functions, as standard, under `cope.Process`. These are:
+`cope` comes with a number of helper functions for easily specifying common `FileProcessor` configuration options without the necessity of writing code. 
 
-- `Process.run(args)` - Returns a process function to run an external process, which is presumed to create the output file from the input file. The arguments are strings as would be passed to `popen` or `subprocess.run`; the special values `cope.INFILE` and `cope.OUTFILE` are replaced with input and output file paths. For example, to invoke the UNIX `cp` command, a call could look like 
-```python
-cope.FileProcessor(
-	"/input_files", 
-	"/output_files", 
-	Process.run("/bin/cp", cope.INFILE, cope.OUTFILE)
-)
-```
-  (In practice, one would use `Process.copy` in this instance.)
+### Processing helper functions
 
-  If the called process returns a nonzero exit code, a `subprocess.CalledProcessError` is raised
+These are under `cope.Process`, and are used for the `process` parameter to `FileProcessor`, allowing some common tasks to be specified easily. The functions available are:
 
-- `Process.captureOutputOf(args)` - like `Process.run`, only to invoke a process whose output will constitute the output file. For this reason, the `OUTFILE` token is not used in the arguments. For example, to use the `cjpeg` JPEG encoder (which sends its output to stdout):
-```python
-cope.FileProcessor(
-	"/input_files", 
-	"/output_files", 
-	Process.captureOutputOf("cjpeg", "-quality", "100", cope.INFILE)
-)
-```
-
-- `process.copy` - a function to copy the source file to the destination path. The example for `Process.run` could be rewritten more efficiently as:
+- `Process.copy` - copy the source file to the destination path. It may be used as follows:
 ```python
 cope.FileProcessor(
 	"/input_files", 
@@ -101,7 +84,43 @@ cope.FileProcessor(
 )
 ```
 
-- `process.hardLink` - a function to create a POSIX hard link from the source file to the destination path. Not available on all file systems.
+- `Process.hardLink` - a function to create a POSIX hard link from the source file to the destination path. Not available on all file systems. It is used as `Process.copy`
+
+
+- `Process.run(args...)` - Returns a process function to run an external process, which is presumed to create the output file from the input file. The arguments are strings as would be passed to `popen` or `subprocess.run`; the special values `cope.INFILE` and `cope.OUTFILE` are replaced with input and output file paths. For example, to invoke the UNIX `cp` command, a call could look like 
+  ```python
+  cope.FileProcessor(
+	  "/input_files", 
+	  "/output_files", 
+      Process.run("/bin/cp", cope.INFILE, cope.OUTFILE)
+  )
+  ```
+  (In practice, one would use `Process.copy` in this instance.)
+
+  If the called process returns a nonzero exit code, a `subprocess.CalledProcessError` is raised
+
+- `Process.captureOutputOf(args...)` - like `Process.run`, only to invoke a process whose output will constitute the output file. For this reason, the `OUTFILE` token is not used in the arguments. For example, to use the `cjpeg` JPEG encoder (which sends its output to stdout):
+  ```python
+  cope.FileProcessor(
+    "/input_files", 
+    "/output_files", 
+    Process.captureOutputOf("cjpeg", "-quality", "100", cope.INFILE)
+  )
+  ```
+
+### Name matching helper functions
+
+These are under `cope.NameMatcher` and are used to specify filename matching criteria for the `includename` field. They are:
+
+ - NameMatcher.endswith(suffix...) - this will match (and include) files ending with any of the suffixes from the provided list. For example, to copy tar archives, one might use:
+   ```python
+   cope.FileProcessor(
+       "/input_files",
+       "/output_files",
+       Process.copy,
+       includefile = NameMatcher.endswith(".tar", ".tar.gz", ".tar.bz2")
+   )
+   ```
 
 ## Implementation details
 

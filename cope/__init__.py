@@ -31,6 +31,7 @@ Typical usage:
 
 from .fileprocessor import FileProcessor
 from .processfunctions import Process, INFILE, OUTFILE
+from .namematchers import NameMatcher
 
-__all__ = ['FileProcessor', 'Process', 'INFILE', 'OUTFILE']
+__all__ = ['FileProcessor', 'Process', 'INFILE', 'OUTFILE', 'NameMatcher']
 

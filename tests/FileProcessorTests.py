@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import time
 
-from cope import FileProcessor, Process
+from cope import FileProcessor, Process, NameMatcher
 
 class FileProcessorTests(unittest.TestCase):
 
@@ -58,7 +58,7 @@ class FileProcessorTests(unittest.TestCase):
 			self.outtree, 
 			Process.hardLink,
 			destname,
-			includename=lambda fn: fn.endswith(".aa"))
+			includename=NameMatcher.endswith(".aa"))
 
 		log = proc.run()
 		self.assertEqual(set(log.processed), {("01/20.aa", "0120.aa"), ("02/11.aa", "0211.aa")})
