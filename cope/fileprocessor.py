@@ -50,11 +50,12 @@ class FileProcessor:
 		if self.onprogress:
 			self.onprogress(*args)
 
-	def run(self, dry_run=False, max_items=None):
+	def run(self, dry_run=False, max_items=None, max_dirs=None):
 		"""Run the process. 
 
 		If dry_run is true, no actual processing is done and the database is not updated, but everything else is handled as if it were live.
 		If max_items is specified, the function will exit after that number of items have been processed.
+		If max_dirs is specified, the function will exit after items are processed in that number of directories.
 
 		Returns a namedtuple containing the following fields, with all paths being relative to base directories:
 		 - processed: list of (source, destination) tuples for all files that were or would have been processed
@@ -63,8 +64,10 @@ class FileProcessor:
 		"""
 
 		processed, already_present, unnameable, failed = [],[],[],[]
+		last_dir = None
 
 		for rsrcpath in self.iterator(self.srcpath):
+			rsrcdir = os.path.dirname(rsrcpath)
 			if max_items == 0:
 				break
 			if not self.includename(rsrcpath):
@@ -92,6 +95,12 @@ class FileProcessor:
 				unnameable.append(rsrcpath)
 				self._call_onprogress(FileProcessor.ProgressType.UNNAMEABLE, rsrcpath, None)
 				continue
+			if max_dirs is not None:
+				if rsrcdir != last_dir:
+					if max_dirs == 0:
+						break
+					max_dirs -= 1
+					last_dir = rsrcdir
 			if not dry_run:
 				fdestpath = os.path.join(self.destpath, rdestpath)
 				os.makedirs(os.path.dirname(fdestpath), exist_ok=True)

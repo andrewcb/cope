@@ -280,6 +280,35 @@ class FileProcessorTests(unittest.TestCase):
 			("02/11.aa", "0211.aa")
 		})
 
+	def test_heedMaxDirs(self):
+		"Ensure that the max_dirs argument is honoured"
+		self.createInputTree([
+			("a0001/bcd/jk", ''),
+			("a0001/bcd/jm", ''),
+			("a0001/bce/jk", ''),
+			("a0001/bce/jm", ''),
+			("a0002/abc", ''),
+			("a0002/abd", ''),
+			("b", ''),
+			("c", '')
+		])
+		def destname(inname):
+			return inname
+
+		proc = FileProcessor(
+			self.intree, 
+			self.outtree,
+			Process.hardLink,
+			destname
+		)
+		log1 = proc.run(max_dirs=2)
+		self.assertEqual(len(log1.processed), 4)
+		self.assertEqual(len(set([os.path.dirname(f[0]) for f in log1.processed])), 2)
+		log2 = proc.run(max_dirs=2)
+		self.assertEqual(len(log2.processed), 4)
+		self.assertEqual(set(log1.processed), set(log2.already_present))
+		self.assertEqual(len(set(log1.processed+log2.processed)), 8)
+
 	def test_customIterator(self):
 		"""
 		Given a FileProcessor with a custom directory iterator

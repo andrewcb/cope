@@ -9,7 +9,8 @@ def TreeWalkIterator(include_dir=lambda d:True, max_dirs=None):
 	Arguments:
 	- include_dir: an optional lambda function called with the relative path of a directory, returning 
 	  a truth value. If false, the directory will not be processed.
-	- max_dirs: the maximum number of directories to process in this run
+	- max_dirs: the maximum number of directories to process in this run. This counts all directories
+	  visited, regardless of whether any action is taken.
 	"""
 	def iter(path):
 		generator = os.walk(path)
