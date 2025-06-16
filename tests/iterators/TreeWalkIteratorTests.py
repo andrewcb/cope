@@ -36,3 +36,20 @@ class TreeWalkIteratorTests(unittest.TestCase):
 		iterated.sort()
 		self.assertEqual(iterated, ["a0001/bcd/jk", "a0001/bcd/jm", "a0001/bce/jk", "a0002/abc", "b"])
 
+	def test_max_dirs(self):
+		"Ensure that the max_dirs argument is honoured"
+		self.createTree(self.tempdir, [
+			("a0001/bcd/jk", ''),
+			("a0001/bcd/jm", ''),
+			("a0001/bce/jk", ''),
+			("a0001/bce/jm", ''),
+			("a0002/abc", ''),
+			("a0002/abd", ''),
+			("b", ''),
+			("c", '')
+		])
+		iter = TreeWalkIterator(max_dirs=2)(self.tempdir)
+		iterated = [f for f in iter]
+		self.assertEqual(len(iterated), 4)
+		self.assertEqual(len(set([os.path.dirname(f) for f in iterated])), 2)
+
