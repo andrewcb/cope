@@ -31,7 +31,7 @@ class TreeWalkIteratorTests(unittest.TestCase):
 			("a0002/abc", ''),
 			("b", '')
 		])
-		iter = TreeWalkIterator(self.tempdir)
+		iter = TreeWalkIterator()(self.tempdir)
 		iterated = [f for f in iter]
 		iterated.sort()
 		self.assertEqual(iterated, ["a0001/bcd/jk", "a0001/bcd/jm", "a0001/bce/jk", "a0002/abc", "b"])
