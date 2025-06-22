@@ -4,7 +4,7 @@ import enum
 import time
 from collections import namedtuple
 from inspect import signature
-from .provenancetracker import ProvenanceTracker
+from .metadatarepository import MetadataRepository
 from .iterators.treewalk import TreeWalkIterator
 
 def argcount(fn):
@@ -44,7 +44,7 @@ class FileProcessor:
 		self.iterator = iterator and iterator or TreeWalkIterator()
 		# a method to call once any file has been processed/skipped, called with a ProgressType enum, source path and destination path or None
 		self.onprogress = onprogress
-		self.provenancetracker = ProvenanceTracker(destpath)
+		self.metadatarepository = MetadataRepository(destpath)
 
 	def _call_onprogress(self, *args):
 		if self.onprogress:
@@ -82,7 +82,7 @@ class FileProcessor:
 			# convert it to microseconds, as modern OSes support 
  			# sub-millisecond timestamps
 			src_mtime = int(os.path.getmtime(fsrcpath)*1000000)
-			prevdest = self.provenancetracker.check(rsrcpath, src_mtime)
+			prevdest = self.metadatarepository.check_for_product(rsrcpath, src_mtime)
 			if prevdest:	
 				already_present.append((rsrcpath, prevdest))
 				self._call_onprogress(FileProcessor.ProgressType.ALREADY_PRESENT, rsrcpath, prevdest)
@@ -110,7 +110,7 @@ class FileProcessor:
 					failed.append((rsrcpath, e))
 					self._call_onprogress(FileProcessor.ProgressType.ERROR, rsrcpath, e)
 					continue
-				self.provenancetracker.record(rsrcpath, src_mtime, rdestpath, int(os.path.getmtime(fdestpath)*1000000))
+				self.metadatarepository.record_product(rsrcpath, src_mtime, rdestpath, int(os.path.getmtime(fdestpath)*1000000))
 			processed.append((rsrcpath, rdestpath))
 			self._call_onprogress(FileProcessor.ProgressType.PROCESSED, rsrcpath, rdestpath)
 			if max_items is not None:

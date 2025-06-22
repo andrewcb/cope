@@ -4,11 +4,11 @@ import time
 import sqlite3
 
 class ProvenanceTracker:
-	def __init__(self, destpath, dblocation=".copemetadata/provenance.sqlite"):
-		self.dbpath = os.path.join(destpath, dblocation)
-		self.dbc = self.ensure_database_exists()
+	def __init__(self, dbpath):
+		self.dbpath = dbpath
+		self.dbc = self._ensure_database_exists()
 
-	def ensure_database_exists(self):
+	def _ensure_database_exists(self):
 		dir = os.path.dirname(self.dbpath)
 		os.makedirs(dir, exist_ok=True)
 		db_existed = os.path.isfile(self.dbpath)

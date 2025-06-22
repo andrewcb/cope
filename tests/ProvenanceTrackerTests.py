@@ -48,22 +48,23 @@ class ProvenanceTrackerTests(unittest.TestCase):
 	#	self.assertEqual(1+1, 2)
 
 	def test_create(self):
-		rec=ProvenanceTracker(self.tempdir)
-		self.assertTrue(os.path.isfile(os.path.join(self.tempdir, ".copemetadata/provenance.sqlite")))
+		dbname = os.path.join(self.tempdir, "foo")
+		rec=ProvenanceTracker(dbname)
+		self.assertTrue(os.path.isfile(dbname))
 		
 	def test_record(self):
-		rec=ProvenanceTracker(self.tempdir)
+		rec=ProvenanceTracker(os.path.join(self.tempdir, ".copemetadata/provenance.sqlite"))
 		rec.record("/in/foo", 1000, "/out/bar", 1234)
 		self.assertTrue(self.db_query("select inpath, inmtime, outpath, outmtime from oprecord"), [("/in/foo", 1000, "/out/bar", 1234)])
 
 	def test_multiple_record(self):
-		rec=ProvenanceTracker(self.tempdir)
+		rec=ProvenanceTracker(os.path.join(self.tempdir, ".copemetadata/provenance.sqlite"))
 		rec.record("/in/foo", 1000, "/out/bar", 1234)
 		rec.record("/in/fpp", 1001, "/out/baz", 1234)
 		self.assertTrue(self.db_query("select inpath, inmtime, outpath, outmtime from oprecord"), [("/in/foo", 1000, "/out/bar", 1234), ("/in/fpp", 1001, "/out/baz", 1234)])
 
 	def test_duplicate_record(self):
-		rec=ProvenanceTracker(self.tempdir)
+		rec=ProvenanceTracker(os.path.join(self.tempdir, ".copemetadata/provenance.sqlite"))
 		rec.record("/in/foo", 1000, "/out/bar", 1234)
 		rec.record("/in/foo", 1235, "/out/bar", 1240)
 		self.assertTrue(self.db_query("select inpath, inmtime, outpath, outmtime from oprecord"), [("/in/foo", 1235, "/out/bar", 1240)])
@@ -72,7 +73,7 @@ class ProvenanceTrackerTests(unittest.TestCase):
 	# ----
 
 	def test_check(self):
-		rec=ProvenanceTracker(self.tempdir)
+		rec=ProvenanceTracker(os.path.join(self.tempdir, ".copemetadata/provenance.sqlite"))
 		self.db_insert_oprecord([
 			("/in/1000-1999/f1023.data", 1027, "/out/a/alpaca/1023.data", 2222, "wibble", 2222),
 			("/in/1000-1999/f1024.data", 1029, "/out/s/sloth/1024.data", 2222, None, 2222),
