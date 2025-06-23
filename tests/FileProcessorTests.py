@@ -309,6 +309,33 @@ class FileProcessorTests(unittest.TestCase):
 		self.assertEqual(set(log1.processed), set(log2.already_present))
 		self.assertEqual(len(set(log1.processed+log2.processed)), 8)
 
+	def test_resume(self):
+		"Ensure that the last processed value is accurate"
+		infiles = ['apple', 'banana', 'cherry', 'durian']
+		self.createInputTree([(fn, '')  for fn in infiles])
+		def iterator(path):
+			for inf in infiles:
+				yield inf
+		proc = FileProcessor(
+			self.intree, 
+			self.outtree, 
+			Process.hardLink,
+			lambda n:n
+		#	iterator=iterator
+		)
+		self.assertEqual(proc.metadatarepository.get_last_processed(), None)
+		log1 = proc.run(max_items=2)
+		self.assertEqual(log1.processed, [('apple', 'apple'), ('banana', 'banana')])
+		self.assertEqual(log1.already_present, [])
+		self.assertEqual(proc.metadatarepository.get_last_processed(), 'banana')
+		log2 = proc.run(max_items=1, resume=True)
+		self.assertEqual(log2.processed, [('cherry', 'cherry')])
+		self.assertEqual(log2.already_present, [])
+		self.assertEqual(proc.metadatarepository.get_last_processed(), 'cherry')
+
+
+
+
 	def test_customIterator(self):
 		"""
 		Given a FileProcessor with a custom directory iterator

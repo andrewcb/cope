@@ -5,7 +5,7 @@ import time
 from collections import namedtuple
 from inspect import signature
 from .metadatarepository import MetadataRepository
-from .iterators.treewalk import TreeWalkIterator
+from .iterators.directorytree import DirectoryTreeIterator
 
 def argcount(fn):
 	"Return how many arguments a function accepts"
@@ -41,7 +41,7 @@ class FileProcessor:
 		self.includefile = includefile and includefile or (lambda n: True)
 		self.destname = destname and destname or (lambda name: name)
 		self.process = process
-		self.iterator = iterator and iterator or TreeWalkIterator()
+		self.iterator = iterator and iterator or DirectoryTreeIterator()
 		# a method to call once any file has been processed/skipped, called with a ProgressType enum, source path and destination path or None
 		self.onprogress = onprogress
 		self.metadatarepository = MetadataRepository(destpath)
@@ -50,12 +50,14 @@ class FileProcessor:
 		if self.onprogress:
 			self.onprogress(*args)
 
-	def run(self, dry_run=False, max_items=None, max_dirs=None):
+	def run(self, dry_run=False, max_items=None, max_dirs=None, resume=False):
 		"""Run the process. 
 
 		If dry_run is true, no actual processing is done and the database is not updated, but everything else is handled as if it were live.
 		If max_items is specified, the function will exit after that number of items have been processed.
 		If max_dirs is specified, the function will exit after items are processed in that number of directories.
+		If resume is set to True, start from the file returned by the iterator immediately after
+		the last file processed.
 
 		Returns a namedtuple containing the following fields, with all paths being relative to base directories:
 		 - processed: list of (source, destination) tuples for all files that were or would have been processed
@@ -65,8 +67,15 @@ class FileProcessor:
 
 		processed, already_present, unnameable, failed = [],[],[],[]
 		last_dir = None
+		start_after = resume and self.metadatarepository.get_last_processed()
 
-		for rsrcpath in self.iterator(self.srcpath):
+		if start_after:
+			iter = self.iterator(self.srcpath, start=start_after)
+			next(iter)
+		else:
+			iter = self.iterator(self.srcpath)
+
+		for rsrcpath in iter:
 			rsrcdir = os.path.dirname(rsrcpath)
 			if max_items == 0:
 				break

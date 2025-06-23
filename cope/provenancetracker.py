@@ -36,3 +36,9 @@ class ProvenanceTracker:
 		cur.execute("DELETE FROM oprecord WHERE OUTPATH=?", (outpath,))
 		cur.execute("INSERT INTO oprecord VALUES (?, ?, ?, ?, ?, ?)", (inpath, inmtime, outpath, outmtime, opname, timestamp))
 		self.dbc.commit()
+
+	def most_recently_processed(self):
+		cur = self.dbc.cursor()
+		cur.execute("SELECT inpath FROM oprecord ORDER BY rowid DESC LIMIT 1")
+		r = cur.fetchone()
+		return r and r[0]

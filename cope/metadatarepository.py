@@ -22,3 +22,8 @@ class MetadataRepository:
 
 	def record_product(self, inpath, inmtime, outpath, outmtime, opname=None, timestamp=None):
 		return self.provenancetracker.record(inpath, inmtime, outpath, outmtime, opname, timestamp)
+
+	# --- last-processed handling
+
+	def get_last_processed(self):
+		return self.provenancetracker.most_recently_processed()
