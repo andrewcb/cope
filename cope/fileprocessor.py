@@ -50,7 +50,7 @@ class FileProcessor:
 		if self.onprogress:
 			self.onprogress(*args)
 
-	def run(self, dry_run=False, max_items=None, max_dirs=None, resume=False):
+	def run(self, dry_run=False, max_items=None, max_dirs=None, limit_to=None, resume=False):
 		"""Run the process. 
 
 		If dry_run is true, no actual processing is done and the database is not updated, but everything else is handled as if it were live.
@@ -69,9 +69,12 @@ class FileProcessor:
 		last_dir = None
 		start_after = resume and self.metadatarepository.get_last_processed()
 
+		# TODO: reject mutually exclusive parameters (i.e., resume and limit_to) specified together
 		if start_after:
 			iter = self.iterator(self.srcpath, start=start_after)
 			next(iter)
+		elif limit_to is not None:
+			iter = self.iterator(self.srcpath, limit_to=limit_to)
 		else:
 			iter = self.iterator(self.srcpath)
 

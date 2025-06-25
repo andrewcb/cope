@@ -313,9 +313,6 @@ class FileProcessorTests(unittest.TestCase):
 		"Ensure that the last processed value is accurate"
 		infiles = ['apple', 'banana', 'cherry', 'durian']
 		self.createInputTree([(fn, '')  for fn in infiles])
-		def iterator(path):
-			for inf in infiles:
-				yield inf
 		proc = FileProcessor(
 			self.intree, 
 			self.outtree, 
@@ -333,7 +330,24 @@ class FileProcessorTests(unittest.TestCase):
 		self.assertEqual(log2.already_present, [])
 		self.assertEqual(proc.metadatarepository.get_last_processed(), 'cherry')
 
-
+	def test_limit_to(self):
+		self.createInputTree([
+			("EU/BE/Brussels", ""),
+			("EU/DE/Berlin", ""),
+			("EU/DE/Hamburg", ""),
+			("EU/ES/Madrid", ""),
+			("EU/FR/Paris", ""),
+			("US/CA/San Francisco", ""),
+			("US/WA/Seattle", ""),
+		])
+		proc = FileProcessor(
+			self.intree, 
+			self.outtree, 
+			Process.hardLink,
+			lambda n:n
+		)
+		log1 = proc.run(limit_to="EU/DE")
+		self.assertEqual(log1.processed, [('EU/DE/Berlin','EU/DE/Berlin'),('EU/DE/Hamburg','EU/DE/Hamburg')])
 
 
 	def test_customIterator(self):
